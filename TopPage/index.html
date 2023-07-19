@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kaisei+Decol:wght@500&family=Kaisei+Opti&display=swap" rel="stylesheet">
   <link rel="stylesheet" type="text/css" href="css/4-1-5.css">
+  <link rel="stylesheet" type="text/css" href="css/8-17.css">
 
   <style>
     html, body {
@@ -135,6 +136,21 @@
         text-decoration: none;
     }
 
+    .glowAnime span {
+        opacity: 0;
+    }
+
+    /*アニメーションで透過を0から1に変化させtext-shadowをつける*/
+    .glowAnime.glow span {
+        animation:glow_anime_on 1s ease-out forwards; 
+    }
+
+    @keyframes glow_anime_on{
+        0% { opacity:0; text-shadow: 0 0 0 #fff,0 0 0 #fff;}
+        50% { opacity:1;text-shadow: 0 0 10px #fff,0 0 15px #fff; }
+        100% { opacity:1; text-shadow: 0 0 0 #fff,0 0 0 #fff;}
+    }
+
 
   </style>
 </head>
@@ -199,6 +215,9 @@
     <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vivus/0.4.4/vivus.min.js"></script>
     <script src="js/4-1-5.js"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <!--自作のJS-->
+    <script src="js/8-17.js"></script>
 
   <script>
     //SVGアニメーションの描画
@@ -206,7 +225,7 @@
     stroke = new Vivus('mask', {//アニメーションをするIDの指定
     start:'manual',//自動再生をせずスタートをマニュアルに
     type: 'scenario-sync',// アニメーションのタイプを設定
-    duration: 10,//アニメーションの時間設定。数字が小さくなるほど速い
+    duration: 7,//アニメーションの時間設定。数字が小さくなるほど速い
     forceRender: false,//パスが更新された場合に再レンダリングさせない
     animTimingFunction:Vivus.EASE,//動きの加速減速設定
     },
@@ -216,8 +235,8 @@
     );
 
     $(window).on('load',function(){
-        $("#splash").delay(3000).fadeOut('slow');//ローディング画面を3秒（3000ms）待機してからフェイドアウト
-	    $("#splash_logo").delay(3000).fadeOut('slow');//ロゴを3秒（3000ms）待機してからフェイドアウト
+        $("#splash").delay(2000).fadeOut('slow');//ローディング画面を3秒（3000ms）待機してからフェイドアウト
+	    $("#splash_logo").delay(2000).fadeOut('slow');//ロゴを3秒（3000ms）待機してからフェイドアウト
         stroke.play();//SVGアニメーションの実行
     });
 
@@ -248,6 +267,13 @@
       });
     }
 
+    window.addEventListener('load', function() {
+        if (window.innerWidth < window.innerHeight) {
+        // 縦画面の場合、横画面に切り替える
+        screen.orientation.lock('landscape');
+        }
+    });
+
 
 
     // 初回の画面読み込み時とリサイズ時に配置を調整する
@@ -260,6 +286,49 @@
         adjustImageLayout();
         adjustTextSize(); // ウィンドウリサイズ時にテキストサイズを調整
     });
+
+
+    // glowAnimeにglowというクラス名を付ける定義
+    function GlowAnimeControl() {
+        $('.glowAnime').each(function () {
+            var elemPos = $(this).offset().top - 50;
+            var scroll = $(window).scrollTop();
+            var windowHeight = $(window).height();
+            if (scroll >= elemPos - windowHeight) {
+                $(this).addClass("glow");
+
+            } else {
+                $(this).removeClass("glow");
+            }
+        });
+    }
+
+    // 画面が読み込まれたらすぐに動かしたい場合の記述
+    $(window).on('load', function () {
+        //spanタグを追加する
+        var element = $(".glowAnime");
+        element.each(function () {
+            var text = $(this).text();
+            var textbox = "";
+            text.split('').forEach(function (t, i) {
+                if (t !== " ") {
+                    if (i < 10) {
+                        textbox += '<span style="animation-delay: .' + i + 's;">' + t + '</span>';
+                    } else {
+                        var n = i / 10;
+                        textbox += '<span style="animation-delay: ' + n + 's;">' + t + '</span>';
+                    }
+
+                } else {
+                    textbox += t;
+                }
+            });
+            $(this).html(textbox);
+        });
+
+        GlowAnimeControl();/* アニメーション用の関数を呼ぶ*/
+    });// ここまで画面が読み込まれたらすぐに動かしたい場合の記述
+
 
   </script>
 </body>
